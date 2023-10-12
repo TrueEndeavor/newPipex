@@ -1,33 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex_utils.c                                      :+:      :+:    :+:   */
+/*   pipex_utils_bonus.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/11 18:43:56 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/12 10:27:36 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "pipex.h"
+#include "pipex_bonus.h"
 
 /**
  * Initializes the pipeline structure, setting default values for its members.
  * 
  * @param pipeline Pointer to the pipeline structure to be initialized.
  */
-void	initialize_pipeline(t_pipeline *pipeline)
+void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 {
 	int	i;
 
 	i = 0;
 	pipeline->infile = -1;
-	while (i < 2)
+	pipeline->cmds = (t_command *) malloc(num_cmds * sizeof(t_command));	
+	if (!pipeline->cmds)
 	{
-		pipeline->cmds[i].cmd_args = NULL;
-		pipeline->cmds[i].cmd_path = NULL;
-		i++;
+		//return (NULL);
 	}
 	pipeline->outfile = -1;
 	pipeline->num_cmds = 0;
@@ -50,7 +49,7 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 	num_cmds = pipeline->num_cmds;
 	idx = num_cmds + 2;
 	i = 0;
-	initialize_pipeline(pipeline);
+	initialize_pipeline(pipeline, num_cmds);
 	pipeline->outfile = open(av[idx], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
 	if (errno == EACCES)
 		display_error(ERR_PERMISSION_DENIED, av[num_cmds + 3]);
@@ -123,7 +122,8 @@ char	*verify_bash_cmd_path(char *cmd)
  * If the command contains a directory path, it is verified and returned.
  * Otherwise, the function attempts to find the command in the provided paths.
  * 
- * @param cmd The command to be rload_pipelineesolved (either a full path or a command name).
+ * @param cmd The command to be rload_pipelineesolved (either a full path or a 
+ *            command name).
  * @param paths An array of paths to search for the command.
  * @return A dynamically allocated string representing the resolved command path
  *         if found and accessible. If not found or inaccessible, appropriate

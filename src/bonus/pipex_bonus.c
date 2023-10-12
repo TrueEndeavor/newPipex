@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/12 12:44:38 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/12 14:43:34 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@
  * Enjoy your journey through PipeX! 🌟
 **/
 
-#include "pipex.h"
+#include "pipex_bonus.h"
 
 /**
  * Sets up input/output redirection for child processes based on child index.

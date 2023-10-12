@@ -1,17 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.h                                            :+:      :+:    :+:   */
+/*   pipex_bonus.h                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/11 14:03:24 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/12 13:26:50 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef PIPEX_H
-# define PIPEX_H
+#ifndef PIPEX_BONUS_H
+# define PIPEX_BONUS_H
 
 /* *****************************   INCLUDES   ******************************* */
 /* For function open() */
@@ -49,7 +49,8 @@ typedef struct Pipeline
 	int			outfile;
 	int			num_cmds;
 	int			pipe_fds[2];
-	t_command	cmds[2];
+	int			prev;
+	t_command	*cmds;
 }	t_pipeline;
 
 /* *****************************   CONSTANTS   ********************************/
@@ -68,7 +69,7 @@ typedef struct Pipeline
  * permissions, while others have read-only permissions.
  */
 # ifndef OUTFILE_PERM
-#  define OUTFILE_PERM 0000644
+#  define OUTFILE_PERM 0000666
 # endif
 
 /* **************************   ERROR MESSAGES   ******************************/
@@ -78,7 +79,7 @@ typedef struct Pipeline
 # define ERR_DIR_DOESNT_EXIST "not a directory"
 # define ERR_PERMISSION_DENIED "Permission denied"
 # define ERR_COMMAND_NOT_FOUND "command not found"
-# define PIPEX_USAGE "./pipex infile \"cmd1 opts\" \"cmd2 opts\" outfile"
+# define PIPEX_B_USAGE "./pipex infile \"cmd1 opts\" ... \"cmdx opts\" outfile"
 
 /* ****************************   FUNCTIONS   *********************************/
 int			has_invalid_input_arguments(int ac, char **av);
@@ -94,5 +95,11 @@ void		free_paths(char **paths);
 void		free_all_commands(t_pipeline *pipeline);
 void		free_commands(t_command *command);
 void		close_pipes(t_pipeline *pipeline);
+
+void		print_pipeline(t_pipeline *pipeline);
+void		print_paths(char **paths);
+void		print_all_commands(t_pipeline *pipeline);
+void		print_commands(t_command *command);
+void		print_pipes(t_pipeline *pipeline);
 
 #endif

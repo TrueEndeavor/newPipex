@@ -6,7 +6,7 @@
 #    By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/15 13:43:15 by lannur-s          #+#    #+#              #
-#    Updated: 2023/10/10 12:48:52 by lannur-s         ###   ########.fr        #
+#    Updated: 2023/10/12 14:45:35 by lannur-s         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,9 +30,10 @@ SRCS = src/mandatory/pipex.c \
 		src/mandatory/free_resources.c \
 
 BONUS_SRCS = src/bonus/pipex_bonus.c \
-		src/bonus/validator.c \
-		src/bonus/pipex_utils.c \
-		src/bonus/free_resources.c \
+		src/bonus/validator_bonus.c \
+		src/bonus/pipex_utils_bonus.c \
+		src/bonus/free_resources_bonus.c \
+		src/bonus/print_resources_bonus.c \
 
 OBJS = $(SRCS:%.c=%.o)
 
@@ -42,7 +43,7 @@ $(NAME): $(OBJS) $(LIBFT_DIR)/$(LIBFTNAME)
 	$(CC) $(CCFLAGS) $(SRCS) $(LIBFT_DIR)/$(LIBFTNAME) $(INCLUDES) -o ${NAME}
 
 $(BONUS_NAME): $(BONUS_OBJS) $(LIBFT_DIR)/$(LIBFTNAME)
-	$(CC) $(CCFLAGS) $(BONUS_SRCS) $(LIBFT_DIR)/$(LIBFTNAME) $(INCLUDES) -o ${NAME}
+	$(CC) $(CCFLAGS) $(BONUS_SRCS) $(LIBFT_DIR)/$(LIBFTNAME) $(INCLUDES) -o ${BONUS_NAME}
 
 $(LIBFT_DIR)/$(LIBFTNAME):
 	make -C $(LIBFT_DIR)
@@ -55,7 +56,7 @@ all: $(NAME)
 bonus: $(BONUS_NAME)
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) $(BONUS_OBJS)
 	cd $(LIBFT_DIR) && make clean
 
 fclean: clean

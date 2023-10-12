@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
+/*   pipex_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/12 12:44:38 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/12 14:25:32 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,34 +62,7 @@
  * Enjoy your journey through PipeX! 🌟
 **/
 
-#include "pipex.h"
-
-/**
- * Sets up input/output redirection for child processes based on child index.
- * 
- * @param pipe_fds Array of pipe file descriptors (pipe_fds[READ] and 
- *                 pipe_fds[WRITE]).
- * @param infile File descriptor for input redirection.
- * @param outfile File descriptor for output redirection.
- * @param child_index Index of the child process in the pipeline.
- */
-void	setup_child_io(int *pipe_fds, int infile, int outfile, int child_index)
-{
-	if (child_index == 1)
-	{
-		close(pipe_fds[READ]);
-		dup2(infile, STDIN_FILENO);
-		dup2(pipe_fds[WRITE], STDOUT_FILENO);
-		close(pipe_fds[WRITE]);
-	}
-	else if (child_index == 2)
-	{
-		close(pipe_fds[WRITE]);
-		dup2(pipe_fds[READ], STDIN_FILENO);
-		dup2(outfile, STDOUT_FILENO);
-		close(pipe_fds[READ]);
-	}
-}
+#include "pipex_bonus.h"
 
 /*
  * Handles errors related to command execution and exits the 
@@ -122,6 +95,20 @@ void	handle_errors(char *cmd_path, char **cmd_args, t_pipeline *pipeline)
 }
 
 /**
+ * Sets up input/output redirection for child processes based on child index.
+ * 
+ * @param infile File descriptor for input redirection.
+ * @param outfile File descriptor for output redirection.
+ */
+void	setup_child_io(int infile, int outfile)
+{
+	dup2(infile, STDIN_FILENO);
+	dup2(outfile, STDOUT_FILENO);
+	close(infile);
+	close(outfile);
+}
+
+/**
  * Configures a child process to execute a command in the given pipeline.
  * 
  * @param pipeline Pointer to the pipeline structure containing command details.
@@ -137,19 +124,30 @@ int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 	int		infile;
 	int		outfile;
 
+	infile = -1;
+	outfile = -1;
 	l_cmd_path = pipeline->cmds[child_index - 1].cmd_path;
 	l_cmd_args = pipeline->cmds[child_index - 1].cmd_args;
 	if (child_index == 1)
 	{
 		infile = pipeline->infile;
-		outfile = -1;
+		close(pipeline->infile);
+		outfile = pipeline->pipe_fds[WRITE];
+		pipeline->prev = pipeline->pipe_fds[READ];
 	}
-	if (child_index == pipeline->num_cmds)
+	else if (child_index > 1 || child_index < pipeline->num_cmds)
 	{
-		infile = -1;
+		infile = pipeline->prev;
+		outfile = pipeline->pipe_fds[WRITE];
+		pipeline->prev = pipeline->pipe_fds[READ];
+	}
+	else if (child_index == pipeline->num_cmds)
+	{
+		infile = pipeline->pipe_fds[READ];
 		outfile = pipeline->outfile;
 	}
-	setup_child_io(pipeline->pipe_fds, infile, outfile, child_index);
+	
+	setup_child_io(infile, outfile);
 	handle_errors(l_cmd_path, l_cmd_args, pipeline);
 	if (execve(l_cmd_path, l_cmd_args, env) == -1)
 	{
@@ -174,19 +172,23 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	int		child_index;
 
 	child_index = 1;
-	if (pipe(pipeline->pipe_fds) == -1)
-	{
-		perror("pipe");
-		exit(EXIT_FAILURE);
-	}
 	while (child_index <= num_children)
 	{
+		if (pipe(pipeline->pipe_fds) == -1)
+		{
+			perror("pipe");
+			exit(EXIT_FAILURE);
+		}
 		pid = fork();
 		if (pid == 0)
 			setup_and_execute_command(pipeline, child_index, env);
+		close(pipeline->pipe_fds[WRITE]);
+		if (child_index != 1)
+			close(pipeline->prev);
+		pipeline->prev = pipeline->pipe_fds[READ];
+		close(pipeline->pipe_fds[READ]);
 		child_index++;
 	}
-	close_pipes(pipeline);
 	child_index = 1;
 	while (child_index <= num_children)
 	{
@@ -231,5 +233,8 @@ int	main(int ac, char **av, char **env)
 		free_paths(paths);
 	status = execute_commands(&pipeline, pipeline.num_cmds, env);
 	free_pipeline(&pipeline);
+/* 	// Add a delay before exiting
+    printf("Press Enter to exit...\n");
+    getchar(); */
 	return (status);
 }
