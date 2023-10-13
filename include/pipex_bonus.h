@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/12 13:26:50 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/13 16:49:42 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,15 +49,16 @@ typedef struct Pipeline
 	int			outfile;
 	int			num_cmds;
 	int			pipe_fds[2];
+	int			pid[1024];	
 	int			prev;
 	t_command	*cmds;
 }	t_pipeline;
 
 /* *****************************   CONSTANTS   ********************************/
 
-/* This program needs atleast 5 parameters minimum on the command line. 
+/* This program needs atleast 4 parameters minimum on the command line. 
 */
-# define MIN_COMMAND_LINE_ARGS 5
+# define MIN_COMMAND_LINE_ARGS 4
 
 # define READ 0
 # define WRITE 1

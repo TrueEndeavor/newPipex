@@ -1,12 +1,12 @@
 # **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
-#    Makefile-b                                         :+:      :+:    :+:    #
+#    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
 #    By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/15 13:43:15 by lannur-s          #+#    #+#              #
-#    Updated: 2023/10/13 16:07:29 by lannur-s         ###   ########.fr        #
+#    Updated: 2023/10/13 11:29:22 by lannur-s         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,12 @@ LIBFT_DIR = ./include/libft_combined
 
 INCLUDES = -I./include -I$(LIBFT_DIR)/include
 
-SRCS = src/bonus/pipex_bonus.c \
+SRCS = src/mandatory/pipex.c \
+		src/mandatory/validator.c \
+		src/mandatory/pipex_utils.c \
+		src/mandatory/free_resources.c \
+
+BONUS_SRCS = src/bonus/pipex_bonus.c \
 		src/bonus/validator_bonus.c \
 		src/bonus/pipex_utils_bonus.c \
 		src/bonus/free_resources_bonus.c \

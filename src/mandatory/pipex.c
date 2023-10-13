@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/12 12:44:38 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/13 15:09:00 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,37 +59,10 @@
  * |                                                                         |
  * +-------------------------------------------------------------------------+
  *
- * Enjoy your journey through PipeX! 🌟
+ * Enjoy your journey through my PipeX! 🌟
 **/
 
 #include "pipex.h"
-
-/**
- * Sets up input/output redirection for child processes based on child index.
- * 
- * @param pipe_fds Array of pipe file descriptors (pipe_fds[READ] and 
- *                 pipe_fds[WRITE]).
- * @param infile File descriptor for input redirection.
- * @param outfile File descriptor for output redirection.
- * @param child_index Index of the child process in the pipeline.
- */
-void	setup_child_io(int *pipe_fds, int infile, int outfile, int child_index)
-{
-	if (child_index == 1)
-	{
-		close(pipe_fds[READ]);
-		dup2(infile, STDIN_FILENO);
-		dup2(pipe_fds[WRITE], STDOUT_FILENO);
-		close(pipe_fds[WRITE]);
-	}
-	else if (child_index == 2)
-	{
-		close(pipe_fds[WRITE]);
-		dup2(pipe_fds[READ], STDIN_FILENO);
-		dup2(outfile, STDOUT_FILENO);
-		close(pipe_fds[READ]);
-	}
-}
 
 /*
  * Handles errors related to command execution and exits the 
@@ -134,22 +107,23 @@ int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 {
 	char	*l_cmd_path;
 	char	**l_cmd_args;
-	int		infile;
-	int		outfile;
 
 	l_cmd_path = pipeline->cmds[child_index - 1].cmd_path;
 	l_cmd_args = pipeline->cmds[child_index - 1].cmd_args;
 	if (child_index == 1)
 	{
-		infile = pipeline->infile;
-		outfile = -1;
+		dup2(pipeline->infile, STDIN_FILENO);
+		close(pipeline->infile);
+		dup2(pipeline->pipe_fds[WRITE], STDOUT_FILENO);
 	}
 	if (child_index == pipeline->num_cmds)
 	{
-		infile = -1;
-		outfile = pipeline->outfile;
+		dup2(pipeline->pipe_fds[READ], STDIN_FILENO);
+		dup2(pipeline->outfile, STDOUT_FILENO);
+		close(pipeline->outfile);
 	}
-	setup_child_io(pipeline->pipe_fds, infile, outfile, child_index);
+	close(pipeline->pipe_fds[WRITE]);
+	close(pipeline->pipe_fds[READ]);
 	handle_errors(l_cmd_path, l_cmd_args, pipeline);
 	if (execve(l_cmd_path, l_cmd_args, env) == -1)
 	{
