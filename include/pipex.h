@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/11 14:03:24 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/16 10:03:15 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,7 @@ typedef struct Pipeline
 /* ****************************   FUNCTIONS   *********************************/
 int			has_invalid_input_arguments(int ac, char **av);
 int			display_error(char *error, char *usage);
+void		err_handler(char *cmd_path, char **cmd_args, t_pipeline *pipeline);
 
 void		load_pipeline(t_pipeline *pipeline, char **av, char **paths);
 t_command	extract_cmd_opts(char *stdin_arg, char **paths);

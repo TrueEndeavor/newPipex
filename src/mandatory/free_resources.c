@@ -6,17 +6,12 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/19 14:43:56 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/10 12:51:26 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/16 09:21:16 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-/**
- * Frees memory allocated for paths array.
- * 
- * @param paths Array of paths to be deallocated.
- */
 void	free_paths(char **paths)
 {
 	int	i;
@@ -35,12 +30,6 @@ void	free_paths(char **paths)
 	}
 }
 
-/**
- * Frees memory associated with command arguments and paths in a t_command 
- * structure.
- * 
- * @param command Pointer to the t_command structure containing command details.
- */
 void	free_commands(t_command *command)
 {
 	int	i;
@@ -62,11 +51,6 @@ void	free_commands(t_command *command)
 	}
 }
 
-/**
- * Frees all memory associated with commands in the pipeline structure.
- * 
- * @param pipeline Pointer to the pipeline structure containing commands.
- */
 void	free_all_commands(t_pipeline *pipeline)
 {
 	int	i;
@@ -80,12 +64,6 @@ void	free_all_commands(t_pipeline *pipeline)
 	}
 }
 
-/**
- * Frees resources allocated for the pipeline structure, including commands, 
- * file descriptors, and pipes.
- * 
- * @param pipeline Pointer to the pipeline structure to be freed.
- */
 void	free_pipeline(t_pipeline *pipeline)
 {
 	int			i;
@@ -103,14 +81,6 @@ void	free_pipeline(t_pipeline *pipeline)
 	close_pipes(pipeline);
 }
 
-/**
- * Closes the pipe file descriptors in the given pipeline structure.
- * If the pipeline pointer is NULL, the function simply returns without taking 
- * any action.
- * 
- * @param pipeline Pointer to the pipeline structure containing pipe file 
- * descriptors.
- */
 void	close_pipes(t_pipeline *pipeline)
 {
 	if (pipeline == NULL)

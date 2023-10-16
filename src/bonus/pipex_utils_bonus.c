@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/13 15:14:19 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/16 10:39:54 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 	pipeline->num_cmds = 0;
 }
 
-
 void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 {
 	int		num_cmds;
@@ -45,7 +44,10 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 		display_error(ERR_PERMISSION_DENIED, av[num_cmds + 3]);
 	pipeline->infile = open(av[1], O_RDONLY);
 	if (num_cmds >= 1024)
-		return (display_error("Pipex: too many commands\n", ""), exit(EXIT_FAILURE));
+	{
+		display_error(ERR_TOO_MANY_COMMANDS, NULL);
+		exit(EXIT_FAILURE);
+	}
 	while (i < num_cmds)
 	{
 		pipeline->cmds[i] = extract_cmd_opts(av[i + 2], paths);
@@ -53,7 +55,6 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 	}
 	pipeline->num_cmds = num_cmds;
 }
-
 
 t_command	extract_cmd_opts(char *stdin_arg, char **paths)
 {
@@ -66,7 +67,6 @@ t_command	extract_cmd_opts(char *stdin_arg, char **paths)
 		command.cmd_path = resolve_cmd_path(paths, command.cmd_args[0]);
 	return (command);
 }
-
 
 char	*verify_bash_cmd_path(char *cmd)
 {
@@ -81,7 +81,6 @@ char	*verify_bash_cmd_path(char *cmd)
 	}
 	return (ft_strdup(cmd));
 }
-
 
 char	*resolve_cmd_path(char **paths, char *cmd)
 {

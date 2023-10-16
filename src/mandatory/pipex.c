@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/13 15:09:00 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/16 10:51:16 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@
  * | - execute_commands() - Executes multiple commands                       |
  * | - setup_and_execute_command() -  Configuring & executing command        |
  * |   - setup_child_io() - I/O redirection configured for child             |
- * |   - handle_errors()  - Errors like non-existent dirs handled            |
+ * |   - err_handler()  - Errors like non-existent dirs handled            |
  * |                                                                         |
  * +-------------------------------------------------------------------------+
  *                                        |
@@ -59,57 +59,13 @@
  * |                                                                         |
  * +-------------------------------------------------------------------------+
  *
- * Enjoy your journey through my PipeX! 🌟
+ * Enjoy your journey through the PipeX project! 🌟
 **/
 
 #include "pipex.h"
 
-/*
- * Handles errors related to command execution and exits the 
- * program with appropriate status codes.
- * 
- * @param cmd_path Path to the command being executed.
- * @param cmd_args Arguments of the command being executed.
- * @param pipeline Pointer to the pipeline structure containing command details.
- */
-void	handle_errors(char *cmd_path, char **cmd_args, t_pipeline *pipeline)
+void	setup_child_io(int child_index, t_pipeline *pipeline)
 {
-	if (ft_strcmp(cmd_path, ERR_DIR_DOESNT_EXIST) == 0)
-	{
-		display_error(ERR_DIR_DOESNT_EXIST, cmd_args[0]);
-		free_all_commands(pipeline);
-		exit (1);
-	}
-	if (ft_strcmp(cmd_path, ERR_FILE_DOESNT_EXIST) == 0)
-	{
-		display_error(ERR_FILE_DOESNT_EXIST, cmd_args[0]);
-		free_all_commands(pipeline);
-		exit (1);
-	}
-	if (ft_strcmp(cmd_path, ERR_COMMAND_NOT_FOUND) == 0 || !cmd_path)
-	{
-		display_error(ERR_COMMAND_NOT_FOUND, cmd_args[0]);
-		free_all_commands(pipeline);
-		exit (127);
-	}
-}
-
-/**
- * Configures a child process to execute a command in the given pipeline.
- * 
- * @param pipeline Pointer to the pipeline structure containing command details.
- * @param child_index Index of the child process in the pipeline.
- * @param env The environment variables passed to the child process.
- * @return 0 if the function is successful 
- * (Note: This return value is not used in the current implementation).
- */
-int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
-{
-	char	*l_cmd_path;
-	char	**l_cmd_args;
-
-	l_cmd_path = pipeline->cmds[child_index - 1].cmd_path;
-	l_cmd_args = pipeline->cmds[child_index - 1].cmd_args;
 	if (child_index == 1)
 	{
 		dup2(pipeline->infile, STDIN_FILENO);
@@ -118,13 +74,26 @@ int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 	}
 	if (child_index == pipeline->num_cmds)
 	{
-		dup2(pipeline->pipe_fds[READ], STDIN_FILENO);
 		dup2(pipeline->outfile, STDOUT_FILENO);
 		close(pipeline->outfile);
 	}
+	if (child_index != 1)
+		dup2(pipeline->pipe_fds[READ], STDIN_FILENO);
+	if (child_index != pipeline->num_cmds)
+		dup2(pipeline->pipe_fds[WRITE], STDOUT_FILENO);
 	close(pipeline->pipe_fds[WRITE]);
 	close(pipeline->pipe_fds[READ]);
-	handle_errors(l_cmd_path, l_cmd_args, pipeline);
+}
+
+int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
+{
+	char	*l_cmd_path;
+	char	**l_cmd_args;
+
+	l_cmd_path = pipeline->cmds[child_index - 1].cmd_path;
+	l_cmd_args = pipeline->cmds[child_index - 1].cmd_args;
+	setup_child_io(child_index, pipeline);
+	err_handler(l_cmd_path, l_cmd_args, pipeline);
 	if (execve(l_cmd_path, l_cmd_args, env) == -1)
 	{
 		free_all_commands(pipeline);
@@ -133,14 +102,6 @@ int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 	return (0);
 }
 
-/**
- * Executes commands in the given pipeline using multiple child processes.
- * 
- * @param pipeline Pointer to the pipeline structure containing command details.
- * @param num_children Number of child processes to create and execute.
- * @param env The environment variables passed to the child processes.
- * @return The exit status of the last executed child process.
- */
 int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 {
 	int		status;
@@ -177,7 +138,6 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
  * @param av Array of command line arguments.
  * @param env Array of environment variables.
  * @return The exit status of the PipeX program.
- *                                      
  *  
  *    +--[Main Function]---------------------+
  *    |  - Input arguments validated         |
