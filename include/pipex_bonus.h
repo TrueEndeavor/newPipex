@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/16 10:27:18 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 12:23:57 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,15 +50,15 @@ typedef struct Pipeline
 	int			num_cmds;
 	int			pipe_fds[2];
 	int			pid[1024];	
-	int			prev_fd;
+	int			prev_fd;	
 	t_command	*cmds;
 }	t_pipeline;
 
 /* *****************************   CONSTANTS   ********************************/
 
-/* This program needs atleast 4 parameters minimum on the command line. 
+/* This program needs atleast 5 parameters minimum on the command line. 
 */
-# define MIN_COMMAND_LINE_ARGS 4
+# define MIN_COMMAND_LINE_ARGS 5
 
 # define READ 0
 # define WRITE 1
@@ -80,8 +80,8 @@ typedef struct Pipeline
 # define ERR_DIR_DOESNT_EXIST "not a directory"
 # define ERR_PERMISSION_DENIED "Permission denied"
 # define ERR_COMMAND_NOT_FOUND "command not found"
-# define ERR_TOO_MANY_COMMANDS "Pipex: too many commands"
-# define PIPEX_B_USAGE "./pipex infile \"cmd1 opts\" ... \"cmdx opts\" outfile"
+# define ERR_TOO_MANY_COMMANDS "Argument list too long"
+# define PIPEX_USAGE "./pipex infile \"cmd1 opts\" \"cmd2 opts\" outfile"
 
 /* ****************************   FUNCTIONS   *********************************/
 int			has_invalid_input_arguments(int ac, char **av);

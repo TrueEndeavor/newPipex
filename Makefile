@@ -6,7 +6,7 @@
 #    By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/15 13:43:15 by lannur-s          #+#    #+#              #
-#    Updated: 2023/10/13 11:29:22 by lannur-s         ###   ########.fr        #
+#    Updated: 2023/10/17 12:05:24 by lannur-s         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,7 +14,7 @@ NAME = pipex
 BONUS_NAME = pipex_bonus
 LIBFTNAME = libft.a
 
-CC = cc
+CC = cc -g3
 CCFLAGS = -Wall -Werror -Wextra
 
 AR = ar

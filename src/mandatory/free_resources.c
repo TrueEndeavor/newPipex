@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/19 14:43:56 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/16 09:21:16 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 11:58:32 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,12 @@ void	free_all_commands(t_pipeline *pipeline)
 	while (i < pipeline->num_cmds)
 	{
 		if (&(pipeline->cmds[i]))
+		{
 			free_commands(&(pipeline->cmds[i]));
+		}
 		i++;
 	}
+	free(pipeline->cmds);
 }
 
 void	free_pipeline(t_pipeline *pipeline)

@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/16 10:51:16 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 12:35:03 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,7 +70,6 @@ void	setup_child_io(int child_index, t_pipeline *pipeline)
 	{
 		dup2(pipeline->infile, STDIN_FILENO);
 		close(pipeline->infile);
-		dup2(pipeline->pipe_fds[WRITE], STDOUT_FILENO);
 	}
 	if (child_index == pipeline->num_cmds)
 	{
@@ -102,6 +101,15 @@ int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 	return (0);
 }
 
+void	create_pipe(int *pipe_fds)
+{
+	if (pipe(pipe_fds) == -1)
+	{
+		perror("pipe");
+		exit(EXIT_FAILURE);
+	}
+}
+
 int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 {
 	int		status;
@@ -109,11 +117,7 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	int		child_index;
 
 	child_index = 1;
-	if (pipe(pipeline->pipe_fds) == -1)
-	{
-		perror("pipe");
-		exit(EXIT_FAILURE);
-	}
+	create_pipe(pipeline->pipe_fds);
 	while (child_index <= num_children)
 	{
 		pid = fork();

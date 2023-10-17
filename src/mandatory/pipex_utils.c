@@ -6,26 +6,27 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/16 09:20:48 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/16 18:30:12 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	initialize_pipeline(t_pipeline *pipeline)
+void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 {
 	int	i;
 
 	i = 0;
 	pipeline->infile = -1;
-	while (i < 2)
+	pipeline->cmds = (t_command *) malloc (num_cmds * sizeof(t_command));
+	while (i < num_cmds)
 	{
 		pipeline->cmds[i].cmd_args = NULL;
 		pipeline->cmds[i].cmd_path = NULL;
 		i++;
 	}
 	pipeline->outfile = -1;
-	pipeline->num_cmds = 0;
+	pipeline->num_cmds = num_cmds;
 }
 
 void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
@@ -37,7 +38,7 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 	num_cmds = pipeline->num_cmds;
 	idx = num_cmds + 2;
 	i = 0;
-	initialize_pipeline(pipeline);
+	initialize_pipeline(pipeline, num_cmds);
 	pipeline->outfile = open(av[idx], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
 	if (errno == EACCES)
 		display_error(ERR_PERMISSION_DENIED, av[num_cmds + 3]);

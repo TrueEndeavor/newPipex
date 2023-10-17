@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/16 10:39:54 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 11:58:44 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 
 	i = 0;
 	pipeline->infile = -1;
-	pipeline->cmds = (t_command *) malloc(num_cmds * sizeof(t_command));
+	pipeline->cmds = (t_command *) malloc (num_cmds * sizeof(t_command));
 	while (i < num_cmds)
 	{
 		pipeline->cmds[i].cmd_args = NULL;
@@ -26,7 +26,7 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 		i++;
 	}
 	pipeline->outfile = -1;
-	pipeline->num_cmds = 0;
+	pipeline->num_cmds = num_cmds;
 }
 
 void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
@@ -43,11 +43,6 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 	if (errno == EACCES)
 		display_error(ERR_PERMISSION_DENIED, av[num_cmds + 3]);
 	pipeline->infile = open(av[1], O_RDONLY);
-	if (num_cmds >= 1024)
-	{
-		display_error(ERR_TOO_MANY_COMMANDS, NULL);
-		exit(EXIT_FAILURE);
-	}
 	while (i < num_cmds)
 	{
 		pipeline->cmds[i] = extract_cmd_opts(av[i + 2], paths);
@@ -58,8 +53,10 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 
 t_command	extract_cmd_opts(char *stdin_arg, char **paths)
 {
+	int			i;
 	t_command	command;
 
+	i = 0;
 	command.cmd_args = ft_split(stdin_arg, ' ');
 	if (!paths)
 		command.cmd_path = verify_bash_cmd_path(command.cmd_args[0]);

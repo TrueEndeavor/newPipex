@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/16 10:41:36 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 12:38:12 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,25 +59,22 @@
  * |                                                                         |
  * +-------------------------------------------------------------------------+
  *
- * Enjoy your journey through PipeX! 🌟
+ * Enjoy your journey through the PipeX project! 🌟
 **/
 
 #include "pipex_bonus.h"
 
 void	setup_child_io(int child_index, t_pipeline *pipeline)
 {
-	if (child_index == 1 || child_index == pipeline->num_cmds)
+	if (child_index == 1)
 	{
-		if (child_index == 1)
-		{
-			dup2(pipeline->infile, STDIN_FILENO);
-			close(pipeline->infile);
-		}
-		if (child_index == pipeline->num_cmds)
-		{
-			dup2(pipeline->outfile, STDOUT_FILENO);
-			close(pipeline->outfile);
-		}
+		dup2(pipeline->infile, STDIN_FILENO);
+		close(pipeline->infile);
+	}
+	if (child_index == pipeline->num_cmds)
+	{
+		dup2(pipeline->outfile, STDOUT_FILENO);
+		close(pipeline->outfile);
 	}
 	if (child_index != 1)
 		dup2(pipeline->prev_fd, STDIN_FILENO);
@@ -124,9 +121,7 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 		create_pipe(pipeline->pipe_fds);
 		pipeline->pid[child_index] = fork();
 		if (pipeline->pid[child_index] == 0)
-		{
 			setup_and_execute_command(pipeline, child_index, env);
-		}
 		close(pipeline->pipe_fds[WRITE]);
 		if (child_index != 1)
 			close(pipeline->prev_fd);
@@ -142,6 +137,23 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	return (WEXITSTATUS(status));
 }
 
+/**
+ * PipeX: Executes commands in a pipeline.
+
+ * @param ac Number of command line arguments.
+ * @param av Array of command line arguments.
+ * @param env Array of environment variables.
+ * @return The exit status of the PipeX program.
+ *  
+ *    +--[Main Function]---------------------+
+ *    |  - Input arguments validated         |
+ *    |  - Paths extracted from environment  |
+ *    |  - Pipeline loaded and executed      |
+ *    |  - Resources cleaned up              |
+ *    |  - Exit status returned              |
+ *    +--------------------------------------+
+ * 
+**/
 int	main(int ac, char **av, char **env)
 {
 	t_pipeline	pipeline;
@@ -158,7 +170,6 @@ int	main(int ac, char **av, char **env)
 	if (paths)
 		free_paths(paths);
 	status = execute_commands(&pipeline, pipeline.num_cmds, env);
-	close(pipeline.pipe_fds[READ]);
 	free_pipeline(&pipeline);
 	return (status);
 }

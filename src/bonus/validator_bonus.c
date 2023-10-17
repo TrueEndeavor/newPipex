@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 10:42:14 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/16 10:39:15 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 12:40:29 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,9 +42,10 @@ int	check_file_permissions(int ac, char **av)
 
 int	has_invalid_input_arguments(int ac, char **av)
 {
+	dprintf(1, "ac=%d\n", ac);
 	if (ac < MIN_COMMAND_LINE_ARGS)
 	{
-		display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_B_USAGE);
+		display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_USAGE);
 		return (1);
 	}
 	return (check_file_permissions(ac, av));
