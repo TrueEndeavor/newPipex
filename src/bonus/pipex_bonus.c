@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/17 12:38:12 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 13:51:54 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	child_index = 1;
 	while (child_index <= num_children)
 	{
-		waitpid(pipeline->pid[child_index], &status, 0);
+		waitpid(pipeline->pid[child_index], &status, WNOHANG);
 		child_index++;
 	}
 	return (WEXITSTATUS(status));

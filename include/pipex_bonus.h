@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/17 12:23:57 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 15:02:59 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,8 @@ void		free_pipeline(t_pipeline *pipeline);
 void		free_paths(char **paths);
 void		free_all_commands(t_pipeline *pipeline);
 void		free_commands(t_command *command);
+
 void		close_pipes(t_pipeline *pipeline);
+void		close_fds(t_pipeline *pipeline);
 
 #endif

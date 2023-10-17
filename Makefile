@@ -6,7 +6,7 @@
 #    By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/08/15 13:43:15 by lannur-s          #+#    #+#              #
-#    Updated: 2023/10/17 12:05:24 by lannur-s         ###   ########.fr        #
+#    Updated: 2023/10/17 15:24:15 by lannur-s         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,12 +28,14 @@ SRCS = src/mandatory/pipex.c \
 		src/mandatory/validator.c \
 		src/mandatory/pipex_utils.c \
 		src/mandatory/free_resources.c \
+		src/mandatory/close_fd.c \
 
 BONUS_SRCS = src/bonus/pipex_bonus.c \
 		src/bonus/validator_bonus.c \
 		src/bonus/pipex_utils_bonus.c \
 		src/bonus/free_resources_bonus.c \
-
+		src/bonus/close_fd_bonus.c \
+		
 OBJS = $(SRCS:%.c=%.o)
 
 BONUS_OBJS = $(BONUS_SRCS:%.c=%.o)

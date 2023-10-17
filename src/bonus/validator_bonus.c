@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 10:42:14 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/17 12:40:29 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 15:09:58 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,13 @@ int	check_file_permissions(int ac, char **av)
 	else if (access(av[1], F_OK) == -1)
 	{
 		display_error(ERR_FILE_DOESNT_EXIST, av[1]);
+		close(fd);
 		return (1);
 	}
 	else if (access(av[1], R_OK) == -1)
 	{
 		display_error(ERR_PERMISSION_DENIED, av[1]);
+		close(fd);
 		exit (1);
 	}
 	if (fd > 0)
@@ -42,7 +44,6 @@ int	check_file_permissions(int ac, char **av)
 
 int	has_invalid_input_arguments(int ac, char **av)
 {
-	dprintf(1, "ac=%d\n", ac);
 	if (ac < MIN_COMMAND_LINE_ARGS)
 	{
 		display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_USAGE);

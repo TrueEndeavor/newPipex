@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/17 12:35:03 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/17 16:12:18 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,23 +113,24 @@ void	create_pipe(int *pipe_fds)
 int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 {
 	int		status;
-	pid_t	pid;
 	int		child_index;
 
 	child_index = 1;
 	create_pipe(pipeline->pipe_fds);
 	while (child_index <= num_children)
 	{
-		pid = fork();
-		if (pid == 0)
+		pipeline->pid[child_index] = fork();
+		if (pipeline->pid[child_index] == 0)
+		{
 			setup_and_execute_command(pipeline, child_index, env);
+		}
 		child_index++;
 	}
 	close_pipes(pipeline);
 	child_index = 1;
 	while (child_index <= num_children)
 	{
-		waitpid(pid, &status, 0);
+		waitpid(pipeline->pid[child_index], &status, 0);
 		child_index++;
 	}
 	return (WEXITSTATUS(status));
