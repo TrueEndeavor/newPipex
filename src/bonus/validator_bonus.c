@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 10:42:14 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:41:09 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/18 18:54:35 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,13 @@ int	check_file_permissions(int ac, char **av)
 			display_error(ERR_FILE_DOESNT_EXIST, av[ac - 1]);
 		return (0);
 	}	
-	else if (access(av[1], F_OK) == -1)
+	else if (ft_strcmp(av[1], "here_doc") == 1 && access(av[1], F_OK) == -1)
 	{
 		display_error(ERR_FILE_DOESNT_EXIST, av[1]);
 		close(fd);
 		return (1);
 	}
-	else if (access(av[1], R_OK) == -1)
+	else if (ft_strcmp(av[1], "here_doc") == 1 && access(av[1], R_OK) == -1)
 	{
 		display_error(ERR_PERMISSION_DENIED, av[1]);
 		close(fd);
@@ -44,11 +44,16 @@ int	check_file_permissions(int ac, char **av)
 
 int	has_invalid_input_arguments(int ac, char **av)
 {
-	if (ac < MIN_COMMAND_LINE_ARGS)
+	if (ft_strcmp(av[1], "here_doc") == 1 && ac < MIN_COMMAND_LINE_ARGS)
 	{
 		display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_USAGE);
 		return (1);
 	}
+	if (ft_strcmp(av[1], "here_doc") == 0 && ac < MIN_CMD_LINE_ARGS_HERE_DOC)
+	{
+		display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_USAGE_HERE_DOC);
+		return (1);
+	}	
 	return (check_file_permissions(ac, av));
 }
 

@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:16:31 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/18 18:46:51 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ typedef struct Pipeline
 	int			outfile;
 	int			num_cmds;
 	int			pipe_fds[2];
-	int			pid[2];		
+	int			pid[2];
 	t_command	*cmds;
 }	t_pipeline;
 

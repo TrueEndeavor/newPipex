@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:42:29 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/18 18:51:38 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,15 +50,15 @@ typedef struct Pipeline
 	int			num_cmds;
 	int			pipe_fds[2];
 	int			prev_fd;
+	int			here_doc;
+	char		*limiter;
 	int			pid[1024];
 	t_command	*cmds;
 }	t_pipeline;
 
 /* *****************************   CONSTANTS   ********************************/
-
-/* This program needs atleast 6 parameters minimum on the command line. 
-*/
 # define MIN_COMMAND_LINE_ARGS 6
+# define MIN_CMD_LINE_ARGS_HERE_DOC 5
 
 # define READ 0
 # define WRITE 1
@@ -82,7 +82,7 @@ typedef struct Pipeline
 # define ERR_COMMAND_NOT_FOUND "command not found"
 # define ERR_TOO_MANY_COMMANDS "Argument list too long"
 # define PIPEX_USAGE "./pipex infile \"cmd1 opts\" \"cmd2 opts\" outfile"
-//# define PIPEX_USAGE_HERE_DOC "./pipex here_doc LIMITER cmd cmd1 file"
+# define PIPEX_USAGE_HERE_DOC "./pipex here_doc LIMITER cmd cmd1 file"
 
 /* ****************************   FUNCTIONS   *********************************/
 int			has_invalid_input_arguments(int ac, char **av);

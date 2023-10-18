@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:41:16 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/18 19:08:14 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,13 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 	idx = num_cmds + 2;
 	i = 0;
 	initialize_pipeline(pipeline, num_cmds);
+	if (ft_strcmp(av[1], "here_doc") == 0)
+	{
+		pipeline->here_doc = 1;
+		pipeline->limiter = ft_strdup(av[2]);
+	}
+	else
+		pipeline->here_doc = 0;
 	pipeline->outfile = open(av[idx], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
 	if (errno == EACCES)
 		display_error(ERR_PERMISSION_DENIED, av[num_cmds + 3]);
@@ -48,7 +55,7 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 		pipeline->cmds[i] = extract_cmd_opts(av[i + 2], paths);
 		i++;
 	}
-	pipeline->num_cmds = num_cmds;
+	pipeline->num_cmds = num_cmds - pipeline->here_doc;
 }
 
 t_command	extract_cmd_opts(char *stdin_arg, char **paths)

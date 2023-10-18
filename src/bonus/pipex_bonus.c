@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:40:52 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/18 18:55:02 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,6 +169,8 @@ int	main(int ac, char **av, char **env)
 	load_pipeline(&pipeline, av, paths);
 	if (paths)
 		free_paths(paths);
+	if (pipeline.here_doc == 1)
+		execute_here_doc(&pipeline);
 	status = execute_commands(&pipeline, pipeline.num_cmds, env);
 	free_pipeline(&pipeline);
 	return (status);
