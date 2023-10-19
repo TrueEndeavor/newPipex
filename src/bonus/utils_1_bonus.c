@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pipex_utils_bonus.c                                :+:      :+:    :+:   */
+/*   utils_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 19:08:14 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/19 16:10:14 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,16 +33,20 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 {
 	int		num_cmds;
 	int		i;
+	int		cmd_arg_idx;	
 	int		idx;
 
 	num_cmds = pipeline->num_cmds;
 	idx = num_cmds + 2;
-	i = 0;
+	i = 0;	
+	cmd_arg_idx = 0;
 	initialize_pipeline(pipeline, num_cmds);
+	pipeline->infile_name = av[1];
 	if (ft_strcmp(av[1], "here_doc") == 0)
 	{
 		pipeline->here_doc = 1;
-		pipeline->limiter = ft_strdup(av[2]);
+		pipeline->limiter = ft_strjoin(av[2], "\n");
+		cmd_arg_idx++;
 	}
 	else
 		pipeline->here_doc = 0;
@@ -52,7 +56,7 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 	pipeline->infile = open(av[1], O_RDONLY);
 	while (i < num_cmds)
 	{
-		pipeline->cmds[i] = extract_cmd_opts(av[i + 2], paths);
+		pipeline->cmds[i] = extract_cmd_opts(av[cmd_arg_idx + 2], paths);
 		i++;
 	}
 	pipeline->num_cmds = num_cmds - pipeline->here_doc;

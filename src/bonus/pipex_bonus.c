@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:55:02 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/19 15:07:34 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,17 @@
 
 void	setup_child_io(int child_index, t_pipeline *pipeline)
 {
+	int		fd;
+
 	if (child_index == 1)
 	{
+		fd = open(pipeline->infile_name, O_RDONLY);
+		if (fd == -1)
+		{
+			display_error(ERR_FILE_DOESNT_EXIST, pipeline->infile_name);
+			close_fds(pipeline);
+			exit(EXIT_FAILURE);
+		}
 		dup2(pipeline->infile, STDIN_FILENO);
 		close(pipeline->infile);
 	}
@@ -121,7 +130,9 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 		create_pipe(pipeline->pipe_fds);
 		pipeline->pid[child_index] = fork();
 		if (pipeline->pid[child_index] == 0)
+		{
 			setup_and_execute_command(pipeline, child_index, env);
+		}
 		close(pipeline->pipe_fds[WRITE]);
 		if (child_index != 1)
 			close(pipeline->prev_fd);
@@ -131,7 +142,7 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	child_index = 1;
 	while (child_index <= num_children)
 	{
-		waitpid(pipeline->pid[child_index], &status, WNOHANG);
+		waitpid(pipeline->pid[child_index], &status, 0);
 		child_index++;
 	}
 	return (WEXITSTATUS(status));
@@ -170,7 +181,9 @@ int	main(int ac, char **av, char **env)
 	if (paths)
 		free_paths(paths);
 	if (pipeline.here_doc == 1)
+	{
 		execute_here_doc(&pipeline);
+	}
 	status = execute_commands(&pipeline, pipeline.num_cmds, env);
 	free_pipeline(&pipeline);
 	return (status);

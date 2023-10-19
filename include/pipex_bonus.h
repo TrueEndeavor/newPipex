@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:51:38 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/19 13:41:53 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,7 @@ typedef struct Pipeline
 	int			pipe_fds[2];
 	int			prev_fd;
 	int			here_doc;
+	char		*infile_name;
 	char		*limiter;
 	int			pid[1024];
 	t_command	*cmds;
@@ -73,6 +74,10 @@ typedef struct Pipeline
 #  define OUTFILE_PERM 0000644
 # endif
 
+# ifndef HEREDOC_FILE_PERM
+#  define HEREDOC_FILE_PERM 0000644
+# endif
+
 /* **************************   ERROR MESSAGES   ******************************/
 
 # define ERR_BAD_ARGUMENTS_COUNT "Bad number of arguments"
@@ -93,6 +98,8 @@ void		load_pipeline(t_pipeline *pipeline, char **av, char **paths);
 t_command	extract_cmd_opts(char *stdin_arg, char **paths);
 char		*resolve_cmd_path(char **paths, char *cmd);
 char		*verify_bash_cmd_path(char *cmd);
+
+void		execute_here_doc(t_pipeline *pipeline);
 
 void		free_pipeline(t_pipeline *pipeline);
 void		free_paths(char **paths);
