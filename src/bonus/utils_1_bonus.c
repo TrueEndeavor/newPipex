@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils_bonus.c                                      :+:      :+:    :+:   */
+/*   utils_1_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/19 16:10:14 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/10/24 08:50:51 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 		i++;
 	}
 	pipeline->outfile = -1;
+	pipeline->limiter = NULL;
 	pipeline->num_cmds = num_cmds;
 }
 
