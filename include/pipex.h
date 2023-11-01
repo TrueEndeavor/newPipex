@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/18 18:46:51 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/01 16:09:44 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ typedef struct Pipeline
 # define ERR_DIR_DOESNT_EXIST "not a directory"
 # define ERR_PERMISSION_DENIED "Permission denied"
 # define ERR_COMMAND_NOT_FOUND "command not found"
-# define PIPEX_USAGE "./pipex infile \"cmd1 opts\" \"cmd2 opts\" outfile (or) ./pipex here_doc LIMITER cmd cmd1 file"
+# define PIPEX_USAGE "./pipex infile \"cmd1 opts\" \"cmd2 opts\" outfile"
 
 /* ****************************   FUNCTIONS   *********************************/
 int			has_invalid_input_arguments(int ac, char **av);

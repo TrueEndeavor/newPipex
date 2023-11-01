@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/24 08:45:59 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/01 19:30:56 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,31 +66,16 @@
 
 void	setup_child_io(int child_index, t_pipeline *pipeline)
 {
-	int		fd;
-
-	if (child_index == 1)
-	{
-		fd = open(pipeline->infile_name, O_RDONLY);
-		if (fd == -1)
-		{
-			display_error(ERR_FILE_DOESNT_EXIST, pipeline->infile_name);
-			close_fds(pipeline);
-			exit(EXIT_FAILURE);
-		}
-		dup2(pipeline->infile, STDIN_FILENO);
-		close(pipeline->infile);
-	}
 	if (child_index == pipeline->num_cmds)
 	{
 		dup2(pipeline->outfile, STDOUT_FILENO);
 		close(pipeline->outfile);
 	}
-	if (child_index != 1)
-		dup2(pipeline->prev_fd, STDIN_FILENO);
 	if (child_index != pipeline->num_cmds)
+	{
 		dup2(pipeline->pipe_fds[WRITE], STDOUT_FILENO);
+	}
 	close(pipeline->pipe_fds[WRITE]);
-	close(pipeline->pipe_fds[READ]);
 }
 
 int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
@@ -112,6 +97,7 @@ int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 
 void	create_pipe(int *pipe_fds)
 {
+//	dprintf(2, "pipe fds of %d: \n%p...%d\n %p ...%d\n", ci, &pipe_fds[0], pipe_fds[0], &pipe_fds[1], pipe_fds[1]);
 	if (pipe(pipe_fds) == -1)
 	{
 		perror("pipe");
@@ -125,24 +111,34 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	int		child_index;
 
 	child_index = 1;
+	pipeline->prev_fd = open(pipeline->infile_name, O_RDONLY);
+	if (pipeline->prev_fd == -1)
+		{
+			display_error(ERR_FILE_DOESNT_EXIST, pipeline->infile_name);
+			close_fds(pipeline);
+			exit(EXIT_FAILURE);
+		}
 	while (child_index <= num_children)
 	{
 		create_pipe(pipeline->pipe_fds);
-		pipeline->pid[child_index] = fork();
-		if (pipeline->pid[child_index] == 0)
+		pipeline->pid[child_index -1] = fork();
+		if (pipeline->pid[child_index - 1] == 0)
 		{
+			close(pipeline->pipe_fds[READ]);
+			dup2(pipeline->prev_fd, STDIN_FILENO);
 			setup_and_execute_command(pipeline, child_index, env);
 		}
-		close(pipeline->pipe_fds[WRITE]);
-		if (child_index != 1)
-			close(pipeline->prev_fd);
-		pipeline->prev_fd = pipeline->pipe_fds[READ];
+		else if (pipeline->pid[child_index - 1] > 1)
+		{
+			close(pipeline->pipe_fds[WRITE]);
+			pipeline->prev_fd = pipeline->pipe_fds[READ];
+		}
 		child_index++;
 	}
 	child_index = 1;
 	while (child_index <= num_children)
 	{
-		waitpid(pipeline->pid[child_index], &status, 0);
+		waitpid(pipeline->pid[child_index - 1], &status, 0);
 		child_index++;
 	}
 	return (WEXITSTATUS(status));
@@ -160,6 +156,7 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
  *    |  - Input arguments validated         |
  *    |  - Paths extracted from environment  |
  *    |  - Pipeline loaded and executed      |
+ *    |  - here_doc executed if available    |
  *    |  - Resources cleaned up              |
  *    |  - Exit status returned              |
  *    +--------------------------------------+

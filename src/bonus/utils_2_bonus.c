@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils1_bonus.c                                     :+:      :+:    :+:   */
+/*   utils_2_bonus.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 19:12:57 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/19 16:12:18 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/01 11:14:14 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,6 @@ void	execute_here_doc(t_pipeline *pipeline)
 		line = get_next_line(STDIN_FILENO);
 		if (!line)
 			break ;
-   		//if (ft_strlen(line)-1 == len && is_limiter(line, pipeline->limiter))
-   		dprintf(1, "...%d\n", ft_strcmp(line, pipeline->limiter));
    		if (ft_strcmp(line, pipeline->limiter) == 0)
 		{
 			free(line);

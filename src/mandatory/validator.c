@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 10:42:14 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/24 08:39:58 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/01 16:11:54 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,28 +14,26 @@
 
 int	check_file_permissions(int ac, char **av)
 {
-	int	fd;
+	int		fd;
+	int		in_errno;
+	int		out_errno;	
 
 	fd = open(av[ac - 1], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
-	if (fd == -1)
+	out_errno = errno;
+	if (access(av[1], R_OK) == -1)
 	{
-		display_error(strerror(errno), av[ac - 1]);
-		return (0);
-	}	
-	else if (access(av[1], F_OK) == -1)
-	{
-		display_error(ERR_FILE_DOESNT_EXIST, av[1]);
-		close(fd);
+		in_errno = errno;
+		if (fd == -1)
+			display_error(strerror(out_errno), av[ac - 1]);
+		display_error(strerror(in_errno), av[1]);
 		return (1);
 	}
-	else if (access(av[1], R_OK) == -1)
+	else if (fd == -1)
 	{
-		display_error(ERR_PERMISSION_DENIED, av[1]);
-		close(fd);
-		exit (1);
-	}
-	if (fd > 0)
-		close(fd);
+		display_error(strerror(out_errno), av[ac - 1]);
+		return (1);
+	}	
+	close(fd);
 	return (0);
 }
 

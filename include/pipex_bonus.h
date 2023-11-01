@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/19 13:41:53 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/01 11:34:16 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,6 @@ typedef struct Command
 
 typedef struct Pipeline
 {
-	int			infile;
 	int			outfile;
 	int			num_cmds;
 	int			pipe_fds[2];
@@ -58,8 +57,8 @@ typedef struct Pipeline
 }	t_pipeline;
 
 /* *****************************   CONSTANTS   ********************************/
-# define MIN_COMMAND_LINE_ARGS 6
-# define MIN_CMD_LINE_ARGS_HERE_DOC 5
+# define MIN_COMMAND_LINE_ARGS 5
+# define MIN_CMD_LINE_ARGS_HERE_DOC 6
 
 # define READ 0
 # define WRITE 1
@@ -78,6 +77,13 @@ typedef struct Pipeline
 #  define HEREDOC_FILE_PERM 0000644
 # endif
 
+# ifndef OUTFILE_MODE
+#  define OUTFILE_MODE O_TRUNC | O_CREAT | O_RDWR
+# endif
+
+# ifndef HEREDOC_OUTFILE_MODE
+#  define HEREDOC_OUTFILE_MODE O_APPEND | O_CREAT | O_RDWR
+# endif
 /* **************************   ERROR MESSAGES   ******************************/
 
 # define ERR_BAD_ARGUMENTS_COUNT "Bad number of arguments"

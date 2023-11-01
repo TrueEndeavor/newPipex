@@ -6,18 +6,34 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/24 08:50:51 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/01 16:10:41 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
-
+/*
+	Initialize Pipeline structure
+		
+		typedef struct Pipeline
+		{
+			int			outfile;
+			int			num_cmds;
+			int			pipe_fds[2];
+			int			prev_fd;
+			int			here_doc;
+			char		*infile_name;
+			char		*limiter;
+			int			pid[1024];
+			t_command	*cmds;
+		}	t_pipeline;
+*/
 void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 {
 	int	i;
 
 	i = 0;
-	pipeline->infile = -1;
+	pipeline->infile_name = NULL;	
+	pipeline->outfile = -1;
 	pipeline->cmds = (t_command *) malloc (num_cmds * sizeof(t_command));
 	while (i < num_cmds)
 	{
@@ -25,7 +41,6 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 		pipeline->cmds[i].cmd_path = NULL;
 		i++;
 	}
-	pipeline->outfile = -1;
 	pipeline->limiter = NULL;
 	pipeline->num_cmds = num_cmds;
 }
@@ -33,28 +48,29 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 {
 	int		num_cmds;
-	int		i;
 	int		cmd_arg_idx;	
-	int		idx;
+	int		last;
+	int		i;
 
 	num_cmds = pipeline->num_cmds;
-	idx = num_cmds + 2;
-	i = 0;	
 	cmd_arg_idx = 0;
+	last = num_cmds + 2;
+	i = 0;	
 	initialize_pipeline(pipeline, num_cmds);
 	pipeline->infile_name = av[1];
 	if (ft_strcmp(av[1], "here_doc") == 0)
 	{
 		pipeline->here_doc = 1;
+		pipeline->infile_name = "/tmp/here_doc";		
 		pipeline->limiter = ft_strjoin(av[2], "\n");
 		cmd_arg_idx++;
+		pipeline->outfile = open(av[last], HEREDOC_OUTFILE_MODE, OUTFILE_PERM);
 	}
 	else
+	{
 		pipeline->here_doc = 0;
-	pipeline->outfile = open(av[idx], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
-	if (errno == EACCES)
-		display_error(ERR_PERMISSION_DENIED, av[num_cmds + 3]);
-	pipeline->infile = open(av[1], O_RDONLY);
+		pipeline->outfile = open(av[last], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
+	}
 	while (i < num_cmds)
 	{
 		pipeline->cmds[i] = extract_cmd_opts(av[cmd_arg_idx + 2], paths);

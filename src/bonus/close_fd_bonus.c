@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/17 15:00:50 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/10/17 15:02:37 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/01 11:09:05 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,6 @@ void	close_pipes(t_pipeline *pipeline)
 
 void	close_fds(t_pipeline *pipeline)
 {
-	if (pipeline->infile >= 0)
-		close(pipeline->infile);
 	if (pipeline->outfile >= 0)
 		close(pipeline->outfile);
 }
