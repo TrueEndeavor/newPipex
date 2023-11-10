@@ -6,34 +6,18 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 16:10:41 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 14:47:26 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex_bonus.h"
-/*
-	Initialize Pipeline structure
-		
-		typedef struct Pipeline
-		{
-			int			outfile;
-			int			num_cmds;
-			int			pipe_fds[2];
-			int			prev_fd;
-			int			here_doc;
-			char		*infile_name;
-			char		*limiter;
-			int			pid[1024];
-			t_command	*cmds;
-		}	t_pipeline;
-*/
+
 void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 {
 	int	i;
 
 	i = 0;
-	pipeline->infile_name = NULL;	
-	pipeline->outfile = -1;
+	pipeline->num_cmds = num_cmds;
 	pipeline->cmds = (t_command *) malloc (num_cmds * sizeof(t_command));
 	while (i < num_cmds)
 	{
@@ -41,39 +25,47 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 		pipeline->cmds[i].cmd_path = NULL;
 		i++;
 	}
+	pipeline->infile = NULL;
+	pipeline->outfile = NULL;
 	pipeline->limiter = NULL;
-	pipeline->num_cmds = num_cmds;
 }
 
 void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 {
 	int		num_cmds;
-	int		cmd_arg_idx;	
 	int		last;
 	int		i;
+	int		idx;
+	int		out_fd;
 
 	num_cmds = pipeline->num_cmds;
-	cmd_arg_idx = 0;
+	idx = num_cmds + 2;	
 	last = num_cmds + 2;
-	i = 0;	
+	i = 0;
 	initialize_pipeline(pipeline, num_cmds);
-	pipeline->infile_name = av[1];
+	pipeline->infile = ft_strdup(av[1]);
+	pipeline->outfile = ft_strdup(av[idx]);	
 	if (ft_strcmp(av[1], "here_doc") == 0)
 	{
 		pipeline->here_doc = 1;
-		pipeline->infile_name = "/tmp/here_doc";		
+		pipeline->infile = "/tmp/here_doc";		
 		pipeline->limiter = ft_strjoin(av[2], "\n");
-		cmd_arg_idx++;
-		pipeline->outfile = open(av[last], HEREDOC_OUTFILE_MODE, OUTFILE_PERM);
+		i++;
+		out_fd = open(av[last], HEREDOC_OUTFILE_MODE, OUTFILE_PERM);
 	}
 	else
 	{
 		pipeline->here_doc = 0;
-		pipeline->outfile = open(av[last], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
 	}
 	while (i < num_cmds)
 	{
-		pipeline->cmds[i] = extract_cmd_opts(av[cmd_arg_idx + 2], paths);
+		if (!av[i + 2] || ft_strcmp(av[i + 2], "") == 0)
+		{
+			display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_USAGE);
+			free_pipeline(pipeline);
+			exit (1);
+		}	
+		pipeline->cmds[i] = extract_cmd_opts(av[i + 2], paths);
 		i++;
 	}
 	pipeline->num_cmds = num_cmds - pipeline->here_doc;
@@ -86,7 +78,7 @@ t_command	extract_cmd_opts(char *stdin_arg, char **paths)
 
 	i = 0;
 	command.cmd_args = ft_split(stdin_arg, ' ');
-	if (!paths)
+	if (!paths || !command.cmd_args[0] || command.cmd_args[0][0] == '\0')
 		command.cmd_path = verify_bash_cmd_path(command.cmd_args[0]);
 	else
 		command.cmd_path = resolve_cmd_path(paths, command.cmd_args[0]);
@@ -95,6 +87,8 @@ t_command	extract_cmd_opts(char *stdin_arg, char **paths)
 
 char	*verify_bash_cmd_path(char *cmd)
 {
+	if (cmd == NULL)
+		return (ft_strdup(ERR_COMMAND_NOT_FOUND));
 	if ((access(cmd, F_OK | X_OK) != 0))
 	{
 		if (errno == ENOTDIR)

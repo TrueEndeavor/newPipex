@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 16:09:29 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 12:55:37 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,12 @@
  *                                         v
  * +-----------------------------[Executing Commands]------------------------+
  * | main.c                                                                  |
- * | - execute_commands() - Executes multiple commands                       |
+ * | - execute_commands() - Executes multiple commands (only 2 here)         |
+ * |   only one pipe and two forks (children) created                        |
  * | - setup_and_execute_command() -  Configuring & executing command        |
  * |   - setup_child_io() - I/O redirection configured for child             |
- * |   - err_handler()  - Errors like non-existent dirs handled            |
+ * |   - err_handler()  - Errors like non-existent dirs handled              |
+ * |   - execve is called after
  * |                                                                         |
  * +-------------------------------------------------------------------------+
  *                                        |
@@ -54,8 +56,8 @@
  * |   - free_commands() - Frees memory associated with t_command struture   |
  * |   - free_all_commands() - Frees all memory associated with commands     |
  * |   - free_pipeline() - Frees all resources of pipeline structure         |
- *                         (including commands, file descriptors, and pipes) |
- * |   - close_pipes() - pipes closed
+ * |                       (including commands, file descriptors, and pipes) |
+ * |   - close_pipes() - pipes closed                                        |
  * |                                                                         |
  * +-------------------------------------------------------------------------+
  *
@@ -66,35 +68,42 @@
 
 void	setup_child_io(int child_index, t_pipeline *pipeline)
 {
+	int	out_fd;
+
+	out_fd = -1;
 	if (child_index == 1)
 	{
-		dup2(pipeline->infile, STDIN_FILENO);
-		close(pipeline->infile);
-	}
-	if (child_index == pipeline->num_cmds)
-	{
-		dup2(pipeline->outfile, STDOUT_FILENO);
-		close(pipeline->outfile);
+		verify_infile_validity(pipeline->infile, pipeline);
+		pipeline->prev = open(pipeline->infile, O_RDONLY);
+		dup2(pipeline->prev, STDIN_FILENO);
+		close(pipeline->prev);
 	}
 	if (child_index != 1)
 		dup2(pipeline->pipe_fds[READ], STDIN_FILENO);
 	if (child_index != pipeline->num_cmds)
 		dup2(pipeline->pipe_fds[WRITE], STDOUT_FILENO);
+	if (child_index == pipeline->num_cmds)
+	{
+		out_fd = verify_outfile_validity(pipeline->outfile, pipeline);
+		dup2(out_fd, STDOUT_FILENO);
+		close(out_fd);
+	}
 	close(pipeline->pipe_fds[WRITE]);
 	close(pipeline->pipe_fds[READ]);
 }
 
 int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 {
-	char	*l_cmd_path;
-	char	**l_cmd_args;
+	char	*cmd_path;
+	char	**cmd_args;
 
-	l_cmd_path = pipeline->cmds[child_index - 1].cmd_path;
-	l_cmd_args = pipeline->cmds[child_index - 1].cmd_args;
+	cmd_path = pipeline->cmds[child_index - 1].cmd_path;
+	cmd_args = pipeline->cmds[child_index - 1].cmd_args;
 	setup_child_io(child_index, pipeline);
-	err_handler(l_cmd_path, l_cmd_args, pipeline);
-	if (execve(l_cmd_path, l_cmd_args, env) == -1)
+	err_handler(cmd_path, cmd_args, pipeline);
+	if (execve(cmd_path, cmd_args, env) == -1)
 	{
+		free_file_names(pipeline);
 		free_all_commands(pipeline);
 		exit(EXIT_FAILURE);
 	}
@@ -114,13 +123,14 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 {
 	int		status;
 	int		child_index;
+	int		pid;
 
 	child_index = 1;
 	create_pipe(pipeline->pipe_fds);
 	while (child_index <= num_children)
 	{
-		pipeline->pid[child_index - 1] = fork();
-		if (pipeline->pid[child_index - 1] == 0)
+		pid = fork();
+		if (pid == 0)
 		{
 			setup_and_execute_command(pipeline, child_index, env);
 		}
@@ -130,7 +140,7 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	child_index = 1;
 	while (child_index <= num_children)
 	{
-		waitpid(pipeline->pid[child_index - 1], &status, 0);
+		waitpid(-1, &status, 0);
 		child_index++;
 	}
 	return (WEXITSTATUS(status));
@@ -159,7 +169,7 @@ int	main(int ac, char **av, char **env)
 	char		**paths;
 	int			status;
 
-	if (has_invalid_input_arguments(ac, av) == 1)
+	if (is_invalid_input_arguments(ac) == 1)
 		exit (EXIT_FAILURE);
 	paths = ft_extract_paths_from_env(env);
 	if (!paths)

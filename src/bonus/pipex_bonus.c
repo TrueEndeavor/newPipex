@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 19:30:56 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 15:40:24 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,29 +66,41 @@
 
 void	setup_child_io(int child_index, t_pipeline *pipeline)
 {
-	if (child_index == pipeline->num_cmds)
-	{
-		dup2(pipeline->outfile, STDOUT_FILENO);
-		close(pipeline->outfile);
-	}
+	int	out_fd;
+
+	out_fd = -1;
+	for (int fd = 0; fd < 256; ++fd) {
+        if (fcntl(fd, F_GETFD) != -1) {
+            printf("%d...", fd);
+        }
+    }
+    printf("\n");
 	if (child_index != pipeline->num_cmds)
 	{
 		dup2(pipeline->pipe_fds[WRITE], STDOUT_FILENO);
 	}
+	if (child_index == pipeline->num_cmds)
+	{
+		out_fd = verify_outfile_validity(pipeline->outfile, pipeline);
+		dup2(out_fd, STDOUT_FILENO);
+		close(out_fd);
+	}
 	close(pipeline->pipe_fds[WRITE]);
+	//close(pipeline->pipe_fds[READ]);
 }
 
 int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 {
-	char	*l_cmd_path;
-	char	**l_cmd_args;
+	char	*cmd_path;
+	char	**cmd_args;
 
-	l_cmd_path = pipeline->cmds[child_index - 1].cmd_path;
-	l_cmd_args = pipeline->cmds[child_index - 1].cmd_args;
+	cmd_path = pipeline->cmds[child_index - 1].cmd_path;
+	cmd_args = pipeline->cmds[child_index - 1].cmd_args;
 	setup_child_io(child_index, pipeline);
-	err_handler(l_cmd_path, l_cmd_args, pipeline);
-	if (execve(l_cmd_path, l_cmd_args, env) == -1)
+	err_handler(cmd_path, cmd_args, pipeline);
+	if (execve(cmd_path, cmd_args, env) == -1)
 	{
+		free_file_names(pipeline);
 		free_all_commands(pipeline);
 		exit(EXIT_FAILURE);
 	}
@@ -97,7 +109,6 @@ int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
 
 void	create_pipe(int *pipe_fds)
 {
-//	dprintf(2, "pipe fds of %d: \n%p...%d\n %p ...%d\n", ci, &pipe_fds[0], pipe_fds[0], &pipe_fds[1], pipe_fds[1]);
 	if (pipe(pipe_fds) == -1)
 	{
 		perror("pipe");
@@ -109,36 +120,33 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 {
 	int		status;
 	int		child_index;
+	int		pid;
 
 	child_index = 1;
-	pipeline->prev_fd = open(pipeline->infile_name, O_RDONLY);
-	if (pipeline->prev_fd == -1)
-		{
-			display_error(ERR_FILE_DOESNT_EXIST, pipeline->infile_name);
-			close_fds(pipeline);
-			exit(EXIT_FAILURE);
-		}
 	while (child_index <= num_children)
 	{
 		create_pipe(pipeline->pipe_fds);
-		pipeline->pid[child_index -1] = fork();
-		if (pipeline->pid[child_index - 1] == 0)
+		pid = fork();
+		if (pid == 0)
 		{
 			close(pipeline->pipe_fds[READ]);
-			dup2(pipeline->prev_fd, STDIN_FILENO);
+		verify_infile_validity(pipeline->infile, pipeline);
+		pipeline->prev = open(pipeline->infile, O_RDONLY);
+		dup2(pipeline->prev, STDIN_FILENO);
+		close(pipeline->prev);			
 			setup_and_execute_command(pipeline, child_index, env);
 		}
-		else if (pipeline->pid[child_index - 1] > 1)
+		else if (pid > 1)
 		{
 			close(pipeline->pipe_fds[WRITE]);
-			pipeline->prev_fd = pipeline->pipe_fds[READ];
+			pipeline->prev = pipeline->pipe_fds[READ];
 		}
 		child_index++;
 	}
 	child_index = 1;
 	while (child_index <= num_children)
 	{
-		waitpid(pipeline->pid[child_index - 1], &status, 0);
+		waitpid(-1, &status, 0);
 		child_index++;
 	}
 	return (WEXITSTATUS(status));
@@ -168,7 +176,7 @@ int	main(int ac, char **av, char **env)
 	char		**paths;
 	int			status;
 
-	if (has_invalid_input_arguments(ac, av) == 1)
+	if (is_invalid_input_arguments(ac, av) == 1)
 		exit (EXIT_FAILURE);
 	paths = ft_extract_paths_from_env(env);
 	if (!paths)

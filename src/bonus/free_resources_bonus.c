@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/19 14:43:56 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 11:08:52 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 14:47:45 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,14 @@ void	free_all_commands(t_pipeline *pipeline)
 	free(pipeline->cmds);
 }
 
+void	free_file_names(t_pipeline *pipeline)
+{
+	if (pipeline->infile != NULL)
+		free(pipeline->infile);
+	if (pipeline->outfile != NULL)
+		free(pipeline->outfile);
+}
+
 void	free_pipeline(t_pipeline *pipeline)
 {
 	int			i;
@@ -76,13 +84,7 @@ void	free_pipeline(t_pipeline *pipeline)
 	j = 0;
 	if (pipeline == NULL)
 		return ;
-	if (pipeline->outfile != -1)
-		close(pipeline->outfile);
-	if (pipeline->limiter != NULL)
-	{
-		free(pipeline->limiter);
-		pipeline->limiter = NULL;
-	}
+	free_file_names(pipeline);
 	free_all_commands(pipeline);
 	close_pipes(pipeline);
 }

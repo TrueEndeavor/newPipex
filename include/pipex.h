@@ -6,9 +6,10 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 16:09:44 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 12:55:06 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
 
 #ifndef PIPEX_H
 # define PIPEX_H
@@ -45,11 +46,11 @@ typedef struct Command
 
 typedef struct Pipeline
 {
-	int			infile;
-	int			outfile;
 	int			num_cmds;
 	int			pipe_fds[2];
-	int			pid[2];
+	int			prev;
+	char		*infile;
+	char		*outfile;
 	t_command	*cmds;
 }	t_pipeline;
 
@@ -63,15 +64,6 @@ typedef struct Pipeline
 # define WRITE 1
 # define COMMAND_NOT_FOUND 127
 
-/* This is the file permission mode for the created file. In this case, 
- * it represents the octal value 0644, which sets the permissions of 
- * the file to rw-r--r--. This means the owner has read and write 
- * permissions, while others have read-only permissions.
- */
-# ifndef OUTFILE_PERM
-#  define OUTFILE_PERM 0000644
-# endif
-
 /* **************************   ERROR MESSAGES   ******************************/
 
 # define ERR_BAD_ARGUMENTS_COUNT "Bad number of arguments"
@@ -82,9 +74,11 @@ typedef struct Pipeline
 # define PIPEX_USAGE "./pipex infile \"cmd1 opts\" \"cmd2 opts\" outfile"
 
 /* ****************************   FUNCTIONS   *********************************/
-int			has_invalid_input_arguments(int ac, char **av);
+int			is_invalid_input_arguments(int ac);
 int			display_error(char *error, char *usage);
 void		err_handler(char *cmd_path, char **cmd_args, t_pipeline *pipeline);
+void		verify_infile_validity(char *infile, t_pipeline *pipeline);
+int			verify_outfile_validity(char *outfile, t_pipeline *pipeline);
 
 void		load_pipeline(t_pipeline *pipeline, char **av, char **paths);
 t_command	extract_cmd_opts(char *stdin_arg, char **paths);
@@ -95,8 +89,8 @@ void		free_pipeline(t_pipeline *pipeline);
 void		free_paths(char **paths);
 void		free_all_commands(t_pipeline *pipeline);
 void		free_commands(t_command *command);
+void		free_file_names(t_pipeline *pipeline);
 
 void		close_pipes(t_pipeline *pipeline);
-void		close_fds(t_pipeline *pipeline);
 
 #endif

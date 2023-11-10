@@ -6,45 +6,45 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/16 10:42:14 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 16:11:54 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 12:44:36 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	check_file_permissions(int ac, char **av)
-{
-	int		fd;
-	int		in_errno;
-	int		out_errno;	
-
-	fd = open(av[ac - 1], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
-	out_errno = errno;
-	if (access(av[1], R_OK) == -1)
-	{
-		in_errno = errno;
-		if (fd == -1)
-			display_error(strerror(out_errno), av[ac - 1]);
-		display_error(strerror(in_errno), av[1]);
-		return (1);
-	}
-	else if (fd == -1)
-	{
-		display_error(strerror(out_errno), av[ac - 1]);
-		return (1);
-	}	
-	close(fd);
-	return (0);
-}
-
-int	has_invalid_input_arguments(int ac, char **av)
+int	is_invalid_input_arguments(int ac)
 {
 	if (ac < MIN_COMMAND_LINE_ARGS || ac > MIN_COMMAND_LINE_ARGS)
 	{
 		display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_USAGE);
 		return (1);
 	}
-	return (check_file_permissions(ac, av));
+	return (0);
+}
+
+void	verify_infile_validity(char *infile, t_pipeline *pipeline)
+{
+	if (access(infile, R_OK) == -1)
+	{
+		display_error(strerror(errno), infile);
+		free_pipeline(pipeline);
+		exit (1);
+	}
+}
+
+int	verify_outfile_validity(char *outfile, t_pipeline *pipeline)
+{
+	int	out_fd;
+
+	out_fd = -1;
+	out_fd = open(outfile, O_TRUNC | O_CREAT | O_RDWR, 0000644);
+	if (out_fd == -1)
+	{
+		display_error(strerror(errno), outfile);
+		free_pipeline(pipeline);
+		exit (1);
+	}
+	return (out_fd);
 }
 
 int	display_error(char *error, char *details)
@@ -56,7 +56,7 @@ int	display_error(char *error, char *details)
 	}
 	ft_putstr_fd(error, STDERR_FILENO);
 	ft_putstr_fd("\n", STDERR_FILENO);
-	return (1);
+	return (0);
 }
 
 void	err_handler(char *cmd_path, char **cmd_args, t_pipeline *pipeline)
@@ -64,22 +64,22 @@ void	err_handler(char *cmd_path, char **cmd_args, t_pipeline *pipeline)
 	if (ft_strcmp(cmd_path, ERR_DIR_DOESNT_EXIST) == 0)
 	{
 		display_error(ERR_DIR_DOESNT_EXIST, cmd_args[0]);
+		free_file_names(pipeline);
 		free_all_commands(pipeline);
-		close_fds(pipeline);
-		exit (1);
+		exit (127);
 	}
 	if (ft_strcmp(cmd_path, ERR_FILE_DOESNT_EXIST) == 0)
 	{
 		display_error(ERR_FILE_DOESNT_EXIST, cmd_args[0]);
+		free_file_names(pipeline);
 		free_all_commands(pipeline);
-		close_fds(pipeline);
-		exit (1);
+		exit (127);
 	}
 	if (ft_strcmp(cmd_path, ERR_COMMAND_NOT_FOUND) == 0 || !cmd_path)
 	{
 		display_error(ERR_COMMAND_NOT_FOUND, cmd_args[0]);
+		free_file_names(pipeline);
 		free_all_commands(pipeline);
-		close_fds(pipeline);
 		exit (127);
 	}
 }

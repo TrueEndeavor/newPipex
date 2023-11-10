@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/18 19:12:57 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 11:14:14 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 13:21:48 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,11 +37,10 @@ void	execute_here_doc(t_pipeline *pipeline)
 	ft_putstr_fd("Please enter heredoc content (type '", STDERR_FILENO);
 	ft_putstr_fd(pipeline->limiter, STDERR_FILENO);
 	ft_putstr_fd("' to end):\n", STDERR_FILENO);
-	temp_fd = open(pipeline->infile_name, O_TRUNC | O_CREAT | O_RDWR, 0664);
+	temp_fd = open(pipeline->infile, O_TRUNC | O_CREAT | O_RDWR, 0664);
 	if (temp_fd == -1)
 	{
-		display_error(ERR_FILE_DOESNT_EXIST, pipeline->infile_name);
-		close_fds(pipeline);
+		display_error(ERR_FILE_DOESNT_EXIST, pipeline->infile);
 		exit(EXIT_FAILURE);
 	}
 	while (1)

@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/09/18 12:38:39 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 16:10:30 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 11:16:04 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 	int	i;
 
 	i = 0;
-	pipeline->infile = -1;
+	pipeline->num_cmds = num_cmds;
 	pipeline->cmds = (t_command *) malloc (num_cmds * sizeof(t_command));
 	while (i < num_cmds)
 	{
@@ -25,8 +25,8 @@ void	initialize_pipeline(t_pipeline *pipeline, int num_cmds)
 		pipeline->cmds[i].cmd_path = NULL;
 		i++;
 	}
-	pipeline->outfile = -1;
-	pipeline->num_cmds = num_cmds;
+	pipeline->infile = NULL;
+	pipeline->outfile = NULL;
 }
 
 void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
@@ -39,12 +39,18 @@ void	load_pipeline(t_pipeline *pipeline, char **av, char **paths)
 	idx = num_cmds + 2;
 	i = 0;
 	initialize_pipeline(pipeline, num_cmds);
-	pipeline->outfile = open(av[idx], O_TRUNC | O_CREAT | O_RDWR, OUTFILE_PERM);
 	if (errno == EACCES)
 		display_error(ERR_PERMISSION_DENIED, av[num_cmds + 3]);
-	pipeline->infile = open(av[1], O_RDONLY);
+	pipeline->outfile = ft_strdup(av[idx]);
+	pipeline->infile = ft_strdup(av[1]);
 	while (i < num_cmds)
 	{
+		if (!av[i + 2] || ft_strcmp(av[i + 2], "") == 0)
+		{
+			display_error(ERR_BAD_ARGUMENTS_COUNT, PIPEX_USAGE);
+			free_pipeline(pipeline);
+			exit (1);
+		}
 		pipeline->cmds[i] = extract_cmd_opts(av[i + 2], paths);
 		i++;
 	}
@@ -58,7 +64,7 @@ t_command	extract_cmd_opts(char *stdin_arg, char **paths)
 
 	i = 0;
 	command.cmd_args = ft_split(stdin_arg, ' ');
-	if (!paths)
+	if (!paths || !command.cmd_args[0] || command.cmd_args[0][0] == '\0')
 		command.cmd_path = verify_bash_cmd_path(command.cmd_args[0]);
 	else
 		command.cmd_path = resolve_cmd_path(paths, command.cmd_args[0]);
@@ -67,6 +73,8 @@ t_command	extract_cmd_opts(char *stdin_arg, char **paths)
 
 char	*verify_bash_cmd_path(char *cmd)
 {
+	if (cmd == NULL)
+		return (ft_strdup(ERR_COMMAND_NOT_FOUND));
 	if ((access(cmd, F_OK | X_OK) != 0))
 	{
 		if (errno == ENOTDIR)

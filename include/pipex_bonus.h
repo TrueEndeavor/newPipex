@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/31 14:19:04 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/01 11:34:16 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/10 14:54:48 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,14 +45,13 @@ typedef struct Command
 
 typedef struct Pipeline
 {
-	int			outfile;
 	int			num_cmds;
 	int			pipe_fds[2];
-	int			prev_fd;
+	int			prev;
 	int			here_doc;
-	char		*infile_name;
+	char		*infile;
+	char		*outfile;
 	char		*limiter;
-	int			pid[1024];
 	t_command	*cmds;
 }	t_pipeline;
 
@@ -96,9 +95,11 @@ typedef struct Pipeline
 # define PIPEX_USAGE_HERE_DOC "./pipex here_doc LIMITER cmd cmd1 file"
 
 /* ****************************   FUNCTIONS   *********************************/
-int			has_invalid_input_arguments(int ac, char **av);
+int			is_invalid_input_arguments(int ac, char **av);
 int			display_error(char *error, char *usage);
 void		err_handler(char *cmd_path, char **cmd_args, t_pipeline *pipeline);
+void		verify_infile_validity(char *infile, t_pipeline *pipeline);
+int			verify_outfile_validity(char *outfile, t_pipeline *pipeline);
 
 void		load_pipeline(t_pipeline *pipeline, char **av, char **paths);
 t_command	extract_cmd_opts(char *stdin_arg, char **paths);
@@ -108,9 +109,10 @@ char		*verify_bash_cmd_path(char *cmd);
 void		execute_here_doc(t_pipeline *pipeline);
 
 void		free_pipeline(t_pipeline *pipeline);
-void		free_paths(char **paths);
+void		free_paths(char **paths); 
 void		free_all_commands(t_pipeline *pipeline);
 void		free_commands(t_command *command);
+void		free_file_names(t_pipeline *pipeline);
 
 void		close_pipes(t_pipeline *pipeline);
 void		close_fds(t_pipeline *pipeline);
