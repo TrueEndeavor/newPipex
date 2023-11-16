@@ -1,0 +1,4 @@
+bonus prev_fd is still not clear
+need deep testing (pipex_tester, PIPEXAMINATOR, bastien_kody)
+heredoc implementation is not thorough
+Finally, test everything well and validate it before minishell

@@ -6,7 +6,7 @@
 /*   By: lannur-s <lannur-s@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/05 16:51:44 by lannur-s          #+#    #+#             */
-/*   Updated: 2023/11/10 15:40:24 by lannur-s         ###   ########.fr       */
+/*   Updated: 2023/11/13 10:48:04 by lannur-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,12 +69,23 @@ void	setup_child_io(int child_index, t_pipeline *pipeline)
 	int	out_fd;
 
 	out_fd = -1;
-	for (int fd = 0; fd < 256; ++fd) {
+	for (int fd = 3; fd < 256; ++fd) {
         if (fcntl(fd, F_GETFD) != -1) {
-            printf("%d...", fd);
+            printf("%d#child = %d...\n", child_index, fd);
         }
     }
     printf("\n");
+    close(pipeline->pipe_fds[READ]);
+    if (child_index == 1)
+    {
+		verify_infile_validity(pipeline->infile, pipeline);
+		pipeline->prev = open(pipeline->infile, O_RDONLY);
+		dup2(pipeline->prev, STDIN_FILENO);
+		close(pipeline->prev);			
+
+    }
+    if (child_index != 1)
+		dup2(pipeline->pipe_fds[READ], STDIN_FILENO);
 	if (child_index != pipeline->num_cmds)
 	{
 		dup2(pipeline->pipe_fds[WRITE], STDOUT_FILENO);
@@ -86,7 +97,7 @@ void	setup_child_io(int child_index, t_pipeline *pipeline)
 		close(out_fd);
 	}
 	close(pipeline->pipe_fds[WRITE]);
-	//close(pipeline->pipe_fds[READ]);
+	close(pipeline->pipe_fds[READ]);
 }
 
 int	setup_and_execute_command(t_pipeline *pipeline, int child_index, char **env)
@@ -125,17 +136,22 @@ int	execute_commands(t_pipeline *pipeline, int num_children, char **env)
 	child_index = 1;
 	while (child_index <= num_children)
 	{
+		for (int fd = 3; fd < 256; ++fd) {
+        if (fcntl(fd, F_GETFD) != -1) {
+            printf("#parent = %d...\n", fd);
+        }
+    }
 		create_pipe(pipeline->pipe_fds);
+		dprintf(2, "pipe2 (%d, %d) =====pipe=====\n", pipeline->pipe_fds[0], pipeline->pipe_fds[1]);
 		pid = fork();
-		if (pid == 0)
-		{
-			close(pipeline->pipe_fds[READ]);
-		verify_infile_validity(pipeline->infile, pipeline);
-		pipeline->prev = open(pipeline->infile, O_RDONLY);
-		dup2(pipeline->prev, STDIN_FILENO);
-		close(pipeline->prev);			
+		if (pid == 0){
+	for (int fd = 0; fd < 256; ++fd) {
+        if (fcntl(fd, F_GETFD) != -1) {
+            printf("child---%d...", fd);
+        }
+    }		
 			setup_and_execute_command(pipeline, child_index, env);
-		}
+		}   
 		else if (pid > 1)
 		{
 			close(pipeline->pipe_fds[WRITE]);
